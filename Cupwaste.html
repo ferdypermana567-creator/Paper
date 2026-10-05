@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Monitoring Waste Cup - Ferdy Permana</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f1f5f9;
+    color:#1e293b;
+}
+
+header{
+    background:linear-gradient(135deg,#0f766e,#14b8a6);
+    color:white;
+    padding:25px 15px;
+    text-align:center;
+}
+
+header h1{
+    margin:0;
+    font-size:25px;
+}
+
+header p{
+    margin:7px 0 0;
+    font-size:14px;
+}
+
+.container{
+    width:95%;
+    max-width:1100px;
+    margin:20px auto;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.card h2{
+    margin-top:0;
+    color:#0f766e;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group label{
+    font-weight:bold;
+    margin-bottom:6px;
+    font-size:14px;
+}
+
+input,select{
+    padding:11px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-size:15px;
+}
+
+input:focus,select:focus{
+    outline:none;
+    border-color:#0f766e;
+}
+
+input[readonly]{
+    background:#f1f5f9;
+}
+
+button{
+    border:none;
+    border-radius:8px;
+    padding:11px 15px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.btn-save{
+    width:100%;
+    margin-top:18px;
+    background:#0f766e;
+    color:white;
+    font-size:16px;
+}
+
+.btn-save:hover{
+    background:#115e59;
+}
+
+.week-buttons{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+.week-btn{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.week-btn.active{
+    background:#0f766e;
+    color:white;
+}
+
+.summary{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-top:20px;
+}
+
+.summary-box{
+    padding:15px;
+    border-radius:10px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+}
+
+.summary-box small{
+    display:block;
+    color:#64748b;
+    margin-bottom:5px;
+}
+
+.summary-box strong{
+    font-size:20px;
+}
+
+.status{
+    text-align:center;
+    font-weight:bold;
+    padding:10px;
+    border-radius:8px;
+    margin-top:15px;
+}
+
+.safe{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.warning{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.danger{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.table-container{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid #e2e8f0;
+    text-align:center;
+    font-size:13px;
+}
+
+th{
+    background:#0f766e;
+    color:white;
+}
+
+.delete-btn{
+    background:#dc2626;
+    color:white;
+    padding:7px 10px;
+}
+
+.progress-container{
+    margin-top:15px;
+}
+
+.progress-title{
+    display:flex;
+    justify-content:space-between;
+    font-size:14px;
+    margin-bottom:6px;
+}
+
+.progress{
+    height:20px;
+    background:#e2e8f0;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:#14b8a6;
+    transition:.5s;
+}
+
+footer{
+    margin-top:30px;
+    padding:25px 15px;
+    text-align:center;
+    background:#1e293b;
+    color:white;
+    border-radius:15px 15px 0 0;
+}
+
+footer h3{
+    margin:0 0 8px;
+}
+
+footer p{
+    margin:5px 0;
+    font-size:14px;
+}
+
+footer strong{
+    display:block;
+    font-size:20px;
+    margin:8px 0;
+}
+
+.copyright{
+    opacity:.6;
+    font-size:12px!important;
+}
+
+@media(max-width:700px){
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .summary{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .week-buttons{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    header h1{
+        font-size:21px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>📊 MONITORING WASTE CUP</h1>
+    <p>Monitoring Pemborosan Cup Produksi</p>
+</header>
+
+<div class="container">
+
+<!-- INPUT DATA -->
+<div class="card">
+
+<h2>📝 Input Data Harian</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+<label>Tanggal</label>
+<input type="date" id="tanggal">
+</div>
+
+<div class="form-group">
+<label>Hari</label>
+<input type="text" id="hari" readonly>
+</div>
+
+<div class="form-group">
+<label>Minggu</label>
+<select id="minggu">
+<option value="1">Week 1</option>
+<option value="2">Week 2</option>
+<option value="3">Week 3</option>
+<option value="4">Week 4</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Suplaian</label>
+<input type="number" id="suplaian" placeholder="Masukkan suplaian">
+</div>
+
+<div class="form-group">
+<label>Reversal</label>
+<input type="number" id="reversal" placeholder="Masukkan reversal">
+</div>
+
+<div class="form-group">
+<label>Pemakaian</label>
+<input type="number" id="pemakaian" readonly>
+</div>
+
+<div class="form-group">
+<label>Finish Good (FG)</label>
+<input type="number" id="fg" placeholder="Masukkan FG">
+</div>
+
+<div class="form-group">
+<label>Pemborosan / Waste</label>
+<input type="number" id="waste" readonly>
+</div>
+
+<div class="form-group">
+<label>Waste %</label>
+<input type="text" id="persen" readonly>
+</div>
+
+</div>
+
+<button class="btn-save" onclick="simpanData()">
+💾 SIMPAN DATA
+</button>
+
+</div>
+
+
+<!-- PILIH WEEK -->
+<div class="card">
+
+<h2>📅 Pilih Minggu</h2>
+
+<div class="week-buttons">
+
+<button class="week-btn active" id="btnWeek1" onclick="pilihWeek(1)">
+WEEK 1
+</button>
+
+<button class="week-btn" id="btnWeek2" onclick="pilihWeek(2)">
+WEEK 2
+</button>
+
+<button class="week-btn" id="btnWeek3" onclick="pilihWeek(3)">
+WEEK 3
+</button>
+
+<button class="week-btn" id="btnWeek4" onclick="pilihWeek(4)">
+WEEK 4
+</button>
+
+</div>
+
+
+<!-- RINGKASAN MINGGU -->
+<div class="summary">
+
+<div class="summary-box">
+<small>Suplaian</small>
+<strong id="weekSuplaian">0</strong>
+</div>
+
+<div class="summary-box">
+<small>Reversal</small>
+<strong id="weekReversal">0</strong>
+</div>
+
+<div class="summary-box">
+<small>Pemakaian</small>
+<strong id="weekPemakaian">0</strong>
+</div>
+
+<div class="summary-box">
+<small>Finish Good</small>
+<strong id="weekFG">0</strong>
+</div>
+
+<div class="summary-box">
+<small>Waste Aktual</small>
+<strong id="weekWaste">0</strong>
+</div>
+
+<div class="summary-box">
+<small>Waste %</small>
+<strong id="weekPersen">0%</strong>
+</div>
+
+<div class="summary-box">
+<small>Jatah Waste Maksimal 0,3%</small>
+<strong id="weekJatah">0</strong>
+</div>
+
+<div class="summary-box">
+<small>Sisa Jatah Waste</small>
+<strong id="weekSisa">0</strong>
+</div>
+
+</div>
+
+
+<div class="progress-container">
+
+<div class="progress-title">
+<span>Pemakaian Jatah Waste</span>
+<span id="progressText">0%</span>
+</div>
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+</div>
+
+
+<div id="weekStatus" class="status safe">
+BELUM ADA DATA
+</div>
+
+</div>
+
+
+<!-- DATA HARIAN -->
+<div class="card">
+
+<h2 id="judulData">
+📋 Data Harian Week 1
+</h2>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>No</th>
+<th>Tanggal</th>
+<th>Hari</th>
+<th>Suplaian</th>
+<th>Reversal</th>
+<th>Pemakaian</th>
+<th>FG</th>
+<th>Waste</th>
+<th>Waste %</th>
+<th>Aksi</th>
+</tr>
+
+</thead>
+
+<tbody id="tabelData"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- GRAFIK -->
+<div class="card">
+
+<h2>
+📈 Grafik Waste Week
+<span id="chartWeek">1</span>
+</h2>
+
+<canvas id="wasteChart"></canvas>
+
+</div>
+
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+
+<h3>📊 Monitoring Waste Cup</h3>
+
+<p>Dibuat & dikembangkan oleh</p>
+
+<strong>Ferdy Permana</strong>
+
+<p class="copyright">
+© 2026 Ferdy Permana
+</p>
+
+</footer>
+
+
+<script>
+
+let data =
+JSON.parse(localStorage.getItem("dataWasteCup")) || [];
+
+let selectedWeek = 1;
+
+let wasteChart = null;
+
+
+// ===============================
+// AUTO HARI
+// ===============================
+
+document.getElementById("tanggal")
+.addEventListener("change",function(){
+
+    let tanggal = new Date(this.value);
+
+    let hari = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu"
+    ];
+
+    document.getElementById("hari").value =
+    hari[tanggal.getDay()];
+
+});
+
+
+// ===============================
+// HITUNG OTOMATIS
+// ===============================
+
+document.getElementById("suplaian")
+.addEventListener("input",hitungPreview);
+
+document.getElementById("reversal")
+.addEventListener("input",hitungPreview);
+
+document.getElementById("fg")
+.addEventListener("input",hitungPreview);
+
+
+function hitungPreview(){
+
+    let suplaian =
+    Number(document.getElementById("suplaian").value) || 0;
+
+    let reversal =
+    Number(document.getElementById("reversal").value) || 0;
+
+    let fg =
+    Number(document.getElementById("fg").value) || 0;
+
+    let pemakaian =
+    suplaian - reversal;
+
+    let waste =
+    pemakaian - fg;
+
+    let persen = 0;
+
+    if(pemakaian > 0){
+
+        persen =
+        (waste / pemakaian) * 100;
+
+    }
+
+    document.getElementById("pemakaian").value =
+    pemakaian >= 0 ? pemakaian : 0;
+
+    document.getElementById("waste").value =
+    waste;
+
+    document.getElementById("persen").value =
+    persen.toFixed(3) + "%";
+
+}
+
+
+// ===============================
+// SIMPAN DATA
+// ===============================
+
+function simpanData(){
+
+    let tanggal =
+    document.getElementById("tanggal").value;
+
+    let hari =
+    document.getElementById("hari").value;
+
+    let minggu =
+    Number(document.getElementById("minggu").value);
+
+    let suplaian =
+    Number(document.getElementById("suplaian").value);
+
+    let reversal =
+    Number(document.getElementById("reversal").value);
+
+    let fg =
+    Number(document.getElementById("fg").value);
+
+
+    if(!tanggal){
+
+        alert("Tanggal belum diisi!");
+
+        return;
+    }
+
+
+    if(suplaian <= 0){
+
+        alert("Suplaian harus diisi!");
+
+        return;
+    }
+
+
+    if(reversal > suplaian){
+
+        alert("Reversal tidak boleh lebih besar dari suplaian!");
+
+        return;
+    }
+
+
+    let pemakaian =
+    suplaian - reversal;
+
+    let waste =
+    pemakaian - fg;
+
+    let persen =
+    pemakaian > 0
+    ? (waste / pemakaian) * 100
+    : 0;
+
+
+    let record = {
+
+        id:Date.now(),
+
+        tanggal:tanggal,
+
+        hari:hari,
+
+        minggu:minggu,
+
+        suplaian:suplaian,
+
+        reversal:reversal,
+
+        pemakaian:pemakaian,
+
+        fg:fg,
+
+        waste:waste,
+
+        persen:persen
+
+    };
+
+
+    data.push(record);
+
+    localStorage.setItem(
+        "dataWasteCup",
+        JSON.stringify(data)
+    );
+
+
+    alert("✅ Data berhasil disimpan!");
+
+    document.getElementById("tanggal").value="";
+    document.getElementById("hari").value="";
+    document.getElementById("suplaian").value="";
+    document.getElementById("reversal").value="";
+    document.getElementById("pemakaian").value="";
+    document.getElementById("fg").value="";
+    document.getElementById("waste").value="";
+    document.getElementById("persen").value="";
+
+
+    pilihWeek(minggu);
+
+}
+
+
+// ===============================
+// PILIH WEEK
+// ===============================
+
+function pilihWeek(week){
+
+    selectedWeek = week;
+
+
+    for(let i=1;i<=4;i++){
+
+        document
+        .getElementById("btnWeek"+i)
+        .classList.remove("active");
+
+    }
+
+
+    document
+    .getElementById("btnWeek"+week)
+    .classList.add("active");
+
+
+    tampilkanWeek();
+
+}
+
+
+// ===============================
+// TAMPILKAN WEEK
+// ===============================
+
+function tampilkanWeek(){
+
+    let weekData =
+    data.filter(item =>
+    item.minggu === selectedWeek
+    );
+
+
+    let totalSuplaian = 0;
+    let totalReversal = 0;
+    let totalPemakaian = 0;
+    let totalFG = 0;
+    let totalWaste = 0;
+
+
+    weekData.forEach(item => {
+
+        totalSuplaian += item.suplaian;
+
+        totalReversal += item.reversal;
+
+        totalPemakaian += item.pemakaian;
+
+        totalFG += item.fg;
+
+        totalWaste += item.waste;
+
+    });
+
+
+    let persen =
+    totalPemakaian > 0
+    ? (totalWaste / totalPemakaian) * 100
+    : 0;
+
+
+    // Jatah maksimal 0.3%
+
+    let jatah =
+    totalPemakaian * 0.003;
+
+
+    let sisa =
+    jatah - totalWaste;
+
+
+    document.getElementById("weekSuplaian")
+    .textContent =
+    totalSuplaian.toLocaleString("id-ID");
+
+
+    document.getElementById("weekReversal")
+    .textContent =
+    totalReversal.toLocaleString("id-ID");
+
+
+    document.getElementById("weekPemakaian")
+    .textContent =
+    totalPemakaian.toLocaleString("id-ID");
+
+
+    document.getElementById("weekFG")
+    .textContent =
+    totalFG.toLocaleString("id-ID");
+
+
+    document.getElementById("weekWaste")
+    .textContent =
+    totalWaste.toLocaleString("id-ID");
+
+
+    document.getElementById("weekPersen")
+    .textContent =
+    persen.toFixed(3) + "%";
+
+
+    document.getElementById("weekJatah")
+    .textContent =
+    Math.floor(jatah).toLocaleString("id-ID");
+
+
+    document.getElementById("weekSisa")
+    .textContent =
+    Math.floor(sisa).toLocaleString("id-ID");
+
+
+    // STATUS
+
+    let status =
+    document.getElementById("weekStatus");
+
+    status.className = "status";
+
+
+    if(totalPemakaian === 0){
+
+        status.textContent =
+        "BELUM ADA DATA";
+
+        status.classList.add("safe");
+
+    }
+
+    else if(persen > 0.3){
+
+        status.textContent =
+        "⚠️ MELEBIHI BATAS 0,3%";
+
+        status.classList.add("danger");
+
+    }
+
+    else if(persen >= 0.25){
+
+        status.textContent =
+        "⚠️ MENDEKATI BATAS 0,3%";
+
+        status.classList.add("warning");
+
+    }
+
+    else{
+
+        status.textContent =
+        "✅ AMAN - DI BAWAH 0,3%";
+
+        status.classList.add("safe");
+
+    }
+
+
+    // PROGRESS JATAH
+
+    let progress = 0;
+
+    if(jatah > 0){
+
+        progress =
+        (totalWaste / jatah) * 100;
+
+    }
+
+
+    if(progress < 0){
+
+        progress = 0;
+
+    }
+
+
+    document.getElementById("progressBar")
+    .style.width =
+    Math.min(progress,100) + "%";
+
+
+    document.getElementById("progressText")
+    .textContent =
+    progress.toFixed(1) + "%";
+
+
+    document.getElementById("judulData")
+    .textContent =
+    "📋 Data Harian Week " + selectedWeek;
+
+
+    document.getElementById("chartWeek")
+    .textContent =
+    selectedWeek;
+
+
+    tampilkanDataWeek(weekData);
+
+    tampilkanGrafikWeek(weekData);
+
+}
+
+
+// ===============================
+// TABEL DATA
+// ===============================
+
+function tampilkanDataWeek(weekData){
+
+    let tbody =
+    document.getElementById("tabelData");
+
+    tbody.innerHTML = "";
+
+
+    weekData.sort(
+        (a,b) =>
+        new Date(a.tanggal) -
+        new Date(b.tanggal)
+    );
+
+
+    if(weekData.length === 0){
+
+        tbody.innerHTML = `
+        <tr>
+        <td colspan="10">
+        Belum ada data untuk Week ${selectedWeek}
+        </td>
+        </tr>
+        `;
+
+        return;
+    }
+
+
+    weekData.forEach((item,index) => {
+
+        let row = document.createElement("tr");
+
+
+        row.innerHTML = `
+
+        <td>${index+1}</td>
+
+        <td>${item.tanggal}</td>
+
+        <td>${item.hari}</td>
+
+        <td>
+        ${item.suplaian.toLocaleString("id-ID")}
+        </td>
+
+        <td>
+        ${item.reversal.toLocaleString("id-ID")}
+        </td>
+
+        <td>
+        ${item.pemakaian.toLocaleString("id-ID")}
+        </td>
+
+        <td>
+        ${item.fg.toLocaleString("id-ID")}
+        </td>
+
+        <td>
+        ${item.waste.toLocaleString("id-ID")}
+        </td>
+
+        <td>
+        ${item.persen.toFixed(3)}%
+        </td>
+
+        <td>
+
+        <button
+        class="delete-btn"
+        onclick="hapusData(${item.id})">
+
+        Hapus
+
+        </button>
+
+        </td>
+
+        `;
+
+
+        tbody.appendChild(row);
+
+    });
+
+}
+
+
+// ===============================
+// HAPUS DATA
+// ===============================
+
+function hapusData(id){
+
+    if(!confirm("Yakin ingin menghapus data ini?")){
+
+        return;
+
+    }
+
+
+    data =
+    data.filter(item =>
+    item.id !== id
+    );
+
+
+    localStorage.setItem(
+        "dataWasteCup",
+        JSON.stringify(data)
+    );
+
+
+    tampilkanWeek();
+
+}
+
+
+// ===============================
+// GRAFIK
+// ===============================
+
+function tampilkanGrafikWeek(weekData){
+
+    let canvas =
+    document.getElementById("wasteChart");
+
+
+    if(wasteChart){
+
+        wasteChart.destroy();
+
+    }
+
+
+    let labels =
+    weekData.map(item =>
+    item.hari + " " + item.tanggal
+    );
+
+
+    let waste =
+    weekData.map(item =>
+    item.waste
+    );
+
+
+    wasteChart =
+    new Chart(canvas,{
+
+        type:"bar",
+
+        data:{
+
+            labels:labels,
+
+            datasets:[{
+
+                label:"Waste Cup (pcs)",
+
+                data:waste
+
+            }]
+
+        },
+
+        options:{
+
+            responsive:true,
+
+            scales:{
+
+                y:{
+
+                    beginAtZero:true
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+// ===============================
+// TAMPILKAN AWAL
+// ===============================
+
+pilihWeek(1);
+
+</script>
+
+</body>
+</html>
